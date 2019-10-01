@@ -10,7 +10,7 @@ services:
     - '80:80'
     environment:
       WEB_PHP_SOCKET: fpm:9000
-      WEB_DOCUMENT_ROOT: /var/www/html/public
+      WEB_DOCUMENT_ROOT: /var/www/html/dist
     volumes:
     - ./html:/var/www/html:delegated    
   db:
