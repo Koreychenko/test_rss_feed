@@ -1,0 +1,22 @@
+version: '2'
+services:
+  fpm:
+    build: ./php
+    volumes:
+    - ./html:/var/www/html:delegated    
+  apache:
+    image: webdevops/apache:alpine-3
+    ports:
+    - '80:80'
+    environment:
+      WEB_PHP_SOCKET: fpm:9000
+      WEB_DOCUMENT_ROOT: /var/www/html/public
+    volumes:
+    - ./html:/var/www/html:delegated    
+  db:
+    build: ./mysql
+    ports:
+    - '3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: rssfeed
