@@ -10,12 +10,22 @@ class FeedController extends AbstractController
 {
     public function getFeedAction(Request $request, Response $response, $args)
     {
-        $feed = [
-            [
-                'title' => 'Title 1',
-                'text' => 'Text',
-            ]
-        ];
+        $url = 'https://workable.com/nr?l=https%3A%2F%2Fwww.theregister.co.uk%2Fsoftware%2Fheadlines.atom';
+        $rss = \Feed::loadRss($url);
+        $feed = [];
+        foreach ($rss->item as $item) {
+            $feed[] = [
+                'id' => $item->id,
+                'updated' => $item->updated,
+                'author' => [
+                    'name' => $item->author->name,
+                    'uri' => $item->author->uri,
+                ],
+                'link' => $item->link,
+                'title' => $item->title,
+                'body' => $item->body
+                ];
+        }
 
         $this->addData('feed', $feed);
 
