@@ -18,6 +18,10 @@
 </div>
 </template>
 <script>
+
+  import axios from 'axios'
+  import config from '../config/config'
+
   export default {
     data() {
       return {
@@ -29,7 +33,9 @@
     },
     methods: {
       onSubmit() {
-
+        axios.post(config.api.LOGIN, this.form).then(response => {
+          console.log(response);
+        });
       }
     }
   }

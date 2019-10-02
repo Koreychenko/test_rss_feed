@@ -7,26 +7,21 @@ use Slim\Psr7\Response;
 
 class AbstractController {
 
-    protected $table;
     private $responseData = [];
-
-    public function __construct(
-        Builder $table
-    ) {
-        $this->table = $table;
-    }
-
-    /**
-     * @return Builder
-     */
-    public function getTable(): Builder
-    {
-        return $this->table;
-    }
 
     public function addData($key, $value)
     {
         $this->responseData[$key] = $value;
+
+        return $this;
+    }
+
+    public function addError($value)
+    {
+        if (!array_key_exists('errors', $this->responseData)) {
+            $this->responseData['errors'] = [];
+        }
+        $this->responseData['errors'][] = $value;
 
         return $this;
     }
@@ -38,6 +33,12 @@ class AbstractController {
         $response->getBody()->write($payload);
         return $response
             ->withHeader('Content-Type', 'application/json');
+    }
+
+    public function getJsonData($request)
+    {
+        $data = json_decode(file_get_contents('php://input'), true);
+        return $data;
     }
 
 }
