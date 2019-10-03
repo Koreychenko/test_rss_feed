@@ -8,7 +8,6 @@
         "illuminate/database": "~5.1",
         "robmorgan/phinx": "0.5.*",
         "tuupola/slim-basic-auth": "^3.2",
-        "tuupola/cors-middleware": "^1.0",
         "dg/rss-php": "^1.4",
         "symfony/cache": "^4.3"
     },
