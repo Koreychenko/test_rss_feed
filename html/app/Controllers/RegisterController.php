@@ -3,27 +3,24 @@
 namespace App\Controllers;
 
 use App\Models\User;
+use App\Services\AuthService;
 use Illuminate\Database\Query\Builder;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
+use Exception;
 
 class RegisterController extends AbstractController
 {
 
     protected $table;
+    protected $authService;
 
     public function __construct(
-        Builder $table
+        Builder $table,
+        AuthService $authService
     ) {
         $this->table = $table;
-    }
-
-    /**
-     * @return Builder
-     */
-    public function getTable(): Builder
-    {
-        return $this->table;
+        $this->authService = $authService;
     }
 
     public function registerAction(Request $request, Response $response, $args)
@@ -35,9 +32,10 @@ class RegisterController extends AbstractController
             try {
                 $user = new User();
                 $user->setAttribute('email', $data['form']['email'])
-                    ->setAttribute('password', $data['form']['password'])->save();
-                $this->addData('token', 'ok');
-            } catch (\Exception $e) {
+                    ->setAttribute('password', md5($data['form']['password']))->save();
+                $token = $this->authService->generateToken($user);
+                $this->addData('token', $token->getAttribute('token'));
+            } catch (Exception $e) {
                 $this->addError($e->getMessage());
             }
 
@@ -52,13 +50,15 @@ class RegisterController extends AbstractController
 
         if ((isset($data['email'])) && (isset($data['password']))) {
             try {
-                $login = $this->getTable()->where('email', '=', $data['email'])->where('password', '=', md5($data['password']))->count();
-                if ($login) {
-                    $this->addData('status', 'ok');
+                $user = User::select()->where('email', '=', $data['email'])->where('password', '=',
+                    md5($data['password']))->first();
+                if ($user) {
+                    $token = $this->authService->generateToken($user);
+                    $this->addData('token', $token->getAttribute('token'));
                 } else {
                     $this->addError('Wrong username or password');
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->addError($e->getMessage());
             }
 
@@ -79,5 +79,13 @@ class RegisterController extends AbstractController
             }
         }
         return $this->sendJson($response);
+    }
+
+    /**
+     * @return Builder
+     */
+    public function getTable(): Builder
+    {
+        return $this->table;
     }
 }

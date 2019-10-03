@@ -4,6 +4,7 @@
 namespace App\Controllers\Middlewares;
 
 
+use App\Services\AuthService;
 use Illuminate\Container\Container;
 use Illuminate\Database\Query\Builder;
 use Psr\Http\Message\ResponseInterface;
@@ -17,15 +18,18 @@ class AuthMiddleware implements MiddlewareInterface
 {
     use DoublePassTrait;
 
-    public $options;
-
     protected $table;
 
+    /**
+     * @var AuthService $authService ;
+     */
+    protected $authService;
+
     public function __construct(
-        Container $container, $options
+        Container $container
     ) {
         $this->table = $container->get('db')->table('token');
-        $this->options = $options;
+        $this->authService = $container->get(AuthService::class);
     }
 
     /**
@@ -41,26 +45,18 @@ class AuthMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if (!in_array($request->getUri()->getPath(), $this->options['exclude'])) {
-            $token = $request->getHeader('x-token');
+        $token = $request->getHeaderLine('x-token');
+        if ((!$token) || (!$this->authService->checkToken($token))) {
+            $response = (new ResponseFactory)->createResponse();
+            $responseData = ['error' => 'noauth'];
+            $payload = json_encode($responseData);
 
-            if ((!$token) || (!$this->checkToken($token))) {
-                $response = (new ResponseFactory)->createResponse();
-                $responseData = ['error' => 'noauth'];
-                $payload = json_encode($responseData);
-
-                $response->getBody()->write($payload);
-                return $response
-                    ->withHeader('Content-Type', 'application/json');
-            }
+            $response->getBody()->write($payload);
+            return $response
+                ->withHeader('Content-Type', 'application/json');
         }
 
         return $handler->handle($request);
-    }
-
-    public function checkToken($token) {
-        $token = $this->table->where('token', '=', $token)->first();
-        return ($token);
     }
 
 }

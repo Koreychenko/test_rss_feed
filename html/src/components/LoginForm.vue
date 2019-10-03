@@ -33,8 +33,9 @@
     },
     methods: {
       onSubmit() {
-        axios.post(config.api.LOGIN, this.form).then(response => {
-          console.log(response);
+        axios.post(config.api.LOGIN, this.form).then(result => {
+          localStorage.setItem('token', result.data.token);
+          this.$router.push({name: 'feed'})
         });
       }
     }

@@ -1,8 +1,13 @@
 <?php
 
 // Service factory for the ORM
+use Illuminate\Database\Capsule\Manager;
+use App\Services\AuthService;
+use App\Controllers\RegisterController;
+use App\Controllers\FeedController;
+
 $container['db'] = function ($container) {
-    $capsule = new \Illuminate\Database\Capsule\Manager;
+    $capsule = new Manager;
     $capsule->addConnection($container['settings']['db']);
 
     $capsule->setAsGlobal();
@@ -11,7 +16,19 @@ $container['db'] = function ($container) {
     return $capsule;
 };
 
-$container[App\Controllers\RegisterController::class] = function ($c) {
+$container[App\Services\AuthService::class] = function ($c) {
+    $table = $c->get('db')->table('token');
+    return new AuthService($table);
+};
+
+$container[RegisterController::class] = function ($c) {
     $table = $c->get('db')->table('users');
-    return new App\Controllers\RegisterController($table);
+    $authService = $c->get(AuthService::class);
+    return new RegisterController($table, $authService);
+};
+
+$container[FeedController::class] = function ($c) {
+    $feedUrl = $c->get('settings')['feedUrl'];
+    $top50wordsWikiPage = $c->get('settings')['top50wordsWikiPage'];
+    return new FeedController($feedUrl, $top50wordsWikiPage);
 };

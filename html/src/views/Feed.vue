@@ -1,6 +1,6 @@
 <template>
   <div v-loading="loading" class="home">
-    <RSSFeed :items="feed"/>
+    <RSSFeed :words="words" :items="feed"/>
   </div>
 </template>
 
@@ -15,6 +15,7 @@
     data: function () {
       return {
         feed: [],
+        words: {},
         loading: true
       }
     },
@@ -35,6 +36,7 @@
             _this.$router.push({'name': 'login'});
           } else {
             _this.feed = result.data.feed;
+            _this.words = result.data.mostFrequentWords;
           }
           _this.loading = false;
         });

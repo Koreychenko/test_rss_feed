@@ -2,33 +2,113 @@
 
 namespace App\Controllers;
 
-use App\Models\User;
+use Feed;
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Contracts\Cache\ItemInterface;
+use DOMDocument;
+use DOMXPath;
 
 class FeedController extends AbstractController
 {
+
+    protected $feedUrl;
+    protected $top50wordsWikiPage;
+
+    public function __construct($feedUrl, $top50wordsWikiPage)
+    {
+        $this->feedUrl = $feedUrl;
+        $this->top50wordsWikiPage = $top50wordsWikiPage;
+    }
+
     public function getFeedAction(Request $request, Response $response, $args)
     {
-        $url = 'https://workable.com/nr?l=https%3A%2F%2Fwww.theregister.co.uk%2Fsoftware%2Fheadlines.atom';
-        $rss = \Feed::loadRss($url);
+        $restrictedWords = $this->getRestrictedWordsList();
+
+        $rss = Feed::load($this->feedUrl);
         $feed = [];
-        foreach ($rss->item as $item) {
-            $feed[] = [
-                'id' => $item->id,
-                'updated' => $item->updated,
+        $text = '';
+        foreach ($rss->entry as $item) {
+            $feedItem = [
+                'id' => strval($item->id),
+                'updated' => strval($item->updated),
                 'author' => [
-                    'name' => $item->author->name,
-                    'uri' => $item->author->uri,
+                    'name' => strval($item->author->name),
+                    'uri' => strval($item->author->uri),
                 ],
-                'link' => $item->link,
-                'title' => $item->title,
-                'body' => $item->body
-                ];
+                'link' => strval($item->link->attributes()['href']),
+                'title' => strval($item->title),
+                'body' => strval(strip_tags(html_entity_decode($item->summary)))
+            ];
+
+            $feed[] = $feedItem;
+
+            array_walk_recursive($feedItem, function ($str, $item) use (&$text) {
+                $text .= $str . ' ';
+            });
         }
 
+        $text = explode(' ', $text);
+
+        $text = array_diff($text, $restrictedWords);
+
+        $wordCounts = array_count_values($text);
+
+        arsort($wordCounts);
+        $wordCounts = array_slice($wordCounts, 0, 10);
         $this->addData('feed', $feed);
 
+        $wordCounts = array_map(function ($count, $word) {
+            return [
+                'word' => $word,
+                'count' => $count
+            ];
+        }, $wordCounts, array_keys($wordCounts));
+
+        $this->addData('mostFrequentWords', $wordCounts);
+
         return $this->sendJson($response);
+    }
+
+    public function getRestrictedWordsList(): array
+    {
+        $cache = new FilesystemAdapter();
+
+        $wordList = $cache->get('restrictedWordsList', function (ItemInterface $item) {
+
+            $ch = curl_init();
+
+            curl_setopt($ch, CURLOPT_HEADER, 0);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_URL, $this->top50wordsWikiPage);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+
+            $data = curl_exec($ch);
+            curl_close($ch);
+
+
+            $dom = new DOMDocument();
+            $dom->loadHTML($data);
+
+            $domXpath = new DOMXPath($dom);
+
+            $words = $domXpath->query('//*[@id="mw-content-text"]/div/table[1]/tbody/tr/td[1]/a');
+
+            $wordList = [];
+
+            $i = 1;
+            foreach ($words as $word) {
+                $wordList[] = $word->nodeValue;
+                $i++;
+                if ($i == 50) {
+                    break;
+                }
+            }
+
+            return $wordList;
+        });
+
+        return $wordList;
     }
 }

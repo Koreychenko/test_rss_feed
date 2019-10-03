@@ -2,10 +2,10 @@
 
 namespace App\Controllers;
 
-use Illuminate\Database\Query\Builder;
 use Slim\Psr7\Response;
 
-class AbstractController {
+class AbstractController
+{
 
     private $responseData = [];
 

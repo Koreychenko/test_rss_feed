@@ -2,20 +2,16 @@
 
 namespace App\Controllers\Middlewares;
 
-use Neomerx\Cors\Analyzer as CorsAnalyzer;
-use Neomerx\Cors\Contracts\AnalysisResultInterface as CorsAnalysisResultInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
-use Tuupola\Http\Factory\ResponseFactory;
 use Tuupola\Middleware\DoublePassTrait;
 
 class JsonBodyParseMiddleware implements MiddlewareInterface
 {
     use DoublePassTrait;
+
     /**
      * Execute as PSR-15 middleware.
      */
