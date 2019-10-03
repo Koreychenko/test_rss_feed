@@ -45,7 +45,7 @@ class FeedController extends AbstractController
             $feed[] = $feedItem;
 
             array_walk_recursive($feedItem, function ($str, $item) use (&$text) {
-                $text .= $str . ' ';
+                $text .= strtolower($str) . ' ';
             });
         }
 
