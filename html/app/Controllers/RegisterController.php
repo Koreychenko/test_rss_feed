@@ -15,6 +15,11 @@ class RegisterController extends AbstractController
     protected $table;
     protected $authService;
 
+    /**
+     * RegisterController constructor.
+     * @param Builder $table
+     * @param AuthService $authService
+     */
     public function __construct(
         Builder $table,
         AuthService $authService
@@ -23,6 +28,15 @@ class RegisterController extends AbstractController
         $this->authService = $authService;
     }
 
+    /**
+     *
+     * Register User callback
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     * @return \Psr\Http\Message\MessageInterface|\Slim\Psr7\Message
+     */
     public function registerAction(Request $request, Response $response, $args)
     {
         $data = $request->getParsedBody();
@@ -41,6 +55,15 @@ class RegisterController extends AbstractController
         return $this->sendJson($response);
     }
 
+    /**
+     *
+     * Login User callback
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     * @return \Psr\Http\Message\MessageInterface|\Slim\Psr7\Message
+     */
     public function loginAction(Request $request, Response $response, $args)
     {
         $data = $request->getParsedBody();
@@ -65,6 +88,15 @@ class RegisterController extends AbstractController
         return $this->sendJson($response);
     }
 
+    /**
+     *
+     * Check email callback
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     * @return \Psr\Http\Message\MessageInterface|\Slim\Psr7\Message
+     */
     public function checkEmailAction(Request $request, Response $response, $args)
     {
         $data = $request->getParsedBody();

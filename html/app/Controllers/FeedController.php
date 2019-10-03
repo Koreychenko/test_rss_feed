@@ -16,12 +16,26 @@ class FeedController extends AbstractController
     protected $feedUrl;
     protected $top50wordsWikiPage;
 
+    /**
+     * FeedController constructor.
+     * @param $feedUrl
+     * @param $top50wordsWikiPage
+     */
     public function __construct($feedUrl, $top50wordsWikiPage)
     {
         $this->feedUrl = $feedUrl;
         $this->top50wordsWikiPage = $top50wordsWikiPage;
     }
 
+    /**
+     * Returns Feed data
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param $args
+     * @return \Psr\Http\Message\MessageInterface|\Slim\Psr7\Message
+     * @throws \FeedException
+     */
     public function getFeedAction(Request $request, Response $response, $args)
     {
         $restrictedWords = $this->getRestrictedWordsList();
@@ -71,6 +85,12 @@ class FeedController extends AbstractController
         return $this->sendJson($response);
     }
 
+    /**
+     * Get a list of the most frequent English words from Wikipedia
+     *
+     * @return array
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
     public function getRestrictedWordsList(): array
     {
         $cache = new FilesystemAdapter();

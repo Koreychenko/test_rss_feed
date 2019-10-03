@@ -4,6 +4,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Exception;
 
 class User extends Model
 {
@@ -17,9 +18,15 @@ class User extends Model
         'password'
     ];
 
+    /**
+     * Simple parameters validation
+     *
+     * @param $data
+     * @throws \Exception
+     */
     public function validate($data) {
         if (!(($data['email']) && ($data['password']))) {
-            throw new \Exception('Invalid email or password');
+            throw new Exception('Invalid email or password');
         }
     }
 }
