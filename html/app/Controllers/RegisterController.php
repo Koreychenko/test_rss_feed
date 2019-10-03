@@ -25,20 +25,17 @@ class RegisterController extends AbstractController
 
     public function registerAction(Request $request, Response $response, $args)
     {
-        $data = $this->getJsonData($request);
+        $data = $request->getParsedBody();
 
-        if ((isset($data['form']['email'])) && (isset($data['form']['password']))) {
-
-            try {
-                $user = new User();
-                $user->setAttribute('email', $data['form']['email'])
-                    ->setAttribute('password', md5($data['form']['password']))->save();
-                $token = $this->authService->generateToken($user);
-                $this->addData('token', $token->getAttribute('token'));
-            } catch (Exception $e) {
-                $this->addError($e->getMessage());
-            }
-
+        try {
+            $user = new User();
+            $user->validate($data['form']);
+            $user->setAttribute('email', $data['form']['email'])
+                ->setAttribute('password', md5($data['form']['password']))->save();
+            $token = $this->authService->generateToken($user);
+            $this->addData('token', $token->getAttribute('token'));
+        } catch (Exception $e) {
+            $this->addError($e->getMessage());
         }
 
         return $this->sendJson($response);
@@ -46,22 +43,23 @@ class RegisterController extends AbstractController
 
     public function loginAction(Request $request, Response $response, $args)
     {
-        $data = $this->getJsonData($request);
+        $data = $request->getParsedBody();
 
-        if ((isset($data['email'])) && (isset($data['password']))) {
+        if ((isset($data['form']['email'])) && (isset($data['form']['password']))) {
             try {
-                $user = User::select()->where('email', '=', $data['email'])->where('password', '=',
-                    md5($data['password']))->first();
+                $user = User::select()->where('email', '=', $data['form']['email'])->where('password', '=',
+                    md5($data['form']['password']))->first();
                 if ($user) {
                     $token = $this->authService->generateToken($user);
                     $this->addData('token', $token->getAttribute('token'));
                 } else {
-                    $this->addError('Wrong username or password');
+                    $this->addError('Wrong email or password');
                 }
             } catch (Exception $e) {
                 $this->addError($e->getMessage());
             }
-
+        } else {
+            $this->addError('Please provide both email and password');
         }
 
         return $this->sendJson($response);

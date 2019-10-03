@@ -34,11 +34,4 @@ class AbstractController
         return $response
             ->withHeader('Content-Type', 'application/json');
     }
-
-    public function getJsonData($request)
-    {
-        $data = json_decode(file_get_contents('php://input'), true);
-        return $data;
-    }
-
 }

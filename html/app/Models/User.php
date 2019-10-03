@@ -16,4 +16,10 @@ class User extends Model
     protected $hiddden = [
         'password'
     ];
+
+    public function validate($data) {
+        if (!(($data['email']) && ($data['password']))) {
+            throw new \Exception('Invalid email or password');
+        }
+    }
 }
