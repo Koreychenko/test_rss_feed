@@ -24,3 +24,8 @@ Running tests:
 You will see code coverage report on:
 
     http://127.0.0.1/coverage-report/index.html
+    
+Settings:
+To cover all business logic with tests, we don't use words get cache.
+But in production, you should enable it in `/app/config/config.php` with settings
+parameter `wordsCache` to `true` , 
