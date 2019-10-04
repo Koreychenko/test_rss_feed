@@ -14,14 +14,4 @@ class Token extends Model
         'user_id',
         'expire'
     ];
-
-    /**
-     * Returns token's user
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
-     */
-    public function getUser()
-    {
-        return $this->hasOne('App\Models\User', 'id', 'user_id');
-    }
 }

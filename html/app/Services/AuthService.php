@@ -13,14 +13,15 @@ use DateInterval;
 class AuthService
 {
     public $table;
-
+    public $timeService;
     /**
      * AuthService constructor.
      * @param Builder $table
      */
-    public function __construct(Builder $table)
+    public function __construct(Builder $table, TimeService $timeService)
     {
         $this->table = $table;
+        $this->timeService = $timeService;
     }
 
     /**
@@ -33,7 +34,7 @@ class AuthService
     {
         $token = new Token();
         $token->setAttribute('user_id', $user->getAttribute('id'));
-        $token->setAttribute('token', md5($user->getAttribute('email') . time()));
+        $token->setAttribute('token', md5($user->getAttribute('email') . microtime() . rand(0, 100)));
         $this->renewToken($token);
         $token->save();
         return $token;
@@ -48,7 +49,7 @@ class AuthService
      */
     public function renewToken(Token &$token)
     {
-        $token->setAttribute('expire', (new DateTime())->add(new DateInterval('P1D')));
+        $token->setAttribute('expire', $this->timeService->getDate()->add(new DateInterval('P1D')));
         return $token;
     }
 
@@ -62,7 +63,7 @@ class AuthService
     public function checkToken(string $token)
     {
         if ($token = Token::select()->where('token', $token)->first()) {
-            if (new DateTime($token->getAttribute('expire')) < new DateTime()) {
+            if (new DateTime($token->getAttribute('expire')) < $this->timeService->getDate()) {
                 $this->deleteToken($token);
                 return false;
             } else {

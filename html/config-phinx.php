@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/app/config/config.php';
+$settings = require __DIR__ . '/app/config/config.php';
 return [
     'paths' => [
         'migrations' => 'migrations/database'
@@ -8,12 +8,12 @@ return [
     'environments' => [
         'default_database' => 'dev',
         'dev' => [
-            'adapter' => DB_ADAPTER,
-            'host' => DB_HOST,
-            'name' => DB_NAME,
-            'user' => DB_USER,
-            'pass' => DB_PASS,
-            'port' => DB_PORT
+            'adapter' => $settings['db']['driver'],
+            'host' => $settings['db']['host'],
+            'name' => $settings['db']['database'],
+            'user' => $settings['db']['username'],
+            'pass' => $settings['db']['password'],
+            'port' => $settings['db']['port']
         ]
     ]
 ];

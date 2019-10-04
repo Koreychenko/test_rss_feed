@@ -16,3 +16,7 @@ Install project and apply migrations:
 Now you can open your project in the browser:
 
     http://127.0.0.1
+    
+Running tests:
+
+    docker-compose exec fpm composer test

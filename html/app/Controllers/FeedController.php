@@ -15,16 +15,18 @@ class FeedController extends AbstractController
 
     protected $feedUrl;
     protected $top50wordsWikiPage;
+    protected $cache;
 
     /**
      * FeedController constructor.
      * @param $feedUrl
      * @param $top50wordsWikiPage
      */
-    public function __construct($feedUrl, $top50wordsWikiPage)
+    public function __construct($feedUrl, $top50wordsWikiPage, $cache = true)
     {
         $this->feedUrl = $feedUrl;
         $this->top50wordsWikiPage = $top50wordsWikiPage;
+        $this->cache = $cache;
     }
 
     /**
@@ -94,6 +96,10 @@ class FeedController extends AbstractController
     public function getRestrictedWordsList(): array
     {
         $cache = new FilesystemAdapter();
+
+        if (!$this->cache) {
+            $cache->delete('restrictedWordsList');
+        }
 
         $wordList = $cache->get('restrictedWordsList', function (ItemInterface $item) {
 
