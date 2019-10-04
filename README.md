@@ -20,3 +20,7 @@ Now you can open your project in the browser:
 Running tests:
 
     docker-compose exec fpm composer test
+    
+You will see code coverage report on:
+
+    http://127.0.0.1/coverage-report/index.html
