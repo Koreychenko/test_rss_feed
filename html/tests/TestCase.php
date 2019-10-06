@@ -29,13 +29,4 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
         return $request;
     }
-
-    public function getResponse($call) {
-        ob_start();
-        $call();
-        $result = ob_get_contents();
-        ob_end_clean();
-        return $result;
-    }
-
 }
